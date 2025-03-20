@@ -27,11 +27,16 @@ from qiskit_ibm_runtime import QiskitRuntimeService
 GRAPHS_DIR = 'graphs'
 
 bond_lengths = [
-    0.05,
-    0.4,
-    0.735,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
     1.5,
+    2.0,
+    2.5,
     3.0,
+    4.0,
+    5.0,
     6.0
 ]
 
@@ -67,8 +72,29 @@ def plot_energy(points):
 
     # Show the plot
     plt.grid(True)
-    plt.show()
     plt.savefig("graphs/energies.png")
+
+    print("Plotting Alt. Energy")
+    plt.clf()
+    # Unpack the x and y coordinates
+    x_coords = [point[0] for point in points]
+    y_coords = [(point[1] + 1/point[0]) for point in points]
+
+    # Create the plot
+    plt.scatter(x_coords, y_coords, color='blue', label='Points')  # Plot the points
+    plt.plot(x_coords, y_coords, color='red', linestyle='--', label='Line')  # Connect the points with a line
+
+    # Add labels and title
+    plt.xlabel('R (a.u.)')
+    plt.ylabel('E (a.u.)')
+    plt.title('Plot of Energy*')
+    plt.legend()
+
+    # Show the plot
+    plt.grid(True)
+    plt.savefig("graphs/alt-energies.png")
+
+    plt.close()
 
 def runType():
     # Prompt the user to choose between simulator and real-time run
@@ -121,8 +147,6 @@ def simRun(bond_lengths):
 
 
     plot_energy(list(zip(bond_lengths, eVals)))
-
-
 
 def QPE_circuit(bond_length):
     driver = PySCFDriver(atom=f'H .0 .0 .0; H .0 .0 {bond_length}', basis='sto3g')
@@ -180,7 +204,7 @@ def runCircuits(backend, circuits):
 
     return job.result()
 
-def saveResults(results):
+def saveResults(resolution, results):
     print("Saving Results")
 
     energies = []
@@ -196,7 +220,7 @@ def saveResults(results):
         max_key, max_value = max(counts.items(), key=lambda x: x[1])
         # Reverse the string with this circuit because the 
         # first is the least significative bit, etc.
-        phi = int(max_key[::-1], 2) / 8
+        phi = int(max_key[::-1], 2) / ((2**resolution)-1)
 
         energy = 2*np.pi * (phi - 1)
         energies.append((bond_lengths[i], energy))
@@ -229,7 +253,7 @@ def main():
         # Run the circuits on Target Hardware
         results = runCircuits(backend, circuits)
 
-        saveResults(results)
+        saveResults(resolution, results)
     else:
         print("Invalid choice. Please enter 1 or 2.")
         return
