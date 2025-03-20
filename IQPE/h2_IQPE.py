@@ -5,7 +5,6 @@ from scipy.linalg import expm
 from qiskit.primitives import StatevectorSampler
 from qiskit.quantum_info import Z2Symmetries
 from qiskit.circuit.library import UnitaryGate
-from qiskit.primitives import Sampler
 from qiskit_nature.second_q.drivers import PySCFDriver
 from qiskit_nature.units import DistanceUnit
 from qiskit_nature.second_q.mappers import ParityMapper
@@ -14,7 +13,7 @@ from qiskit_nature.second_q.circuit.library import HartreeFock
 from qiskit_algorithms import NumPyMinimumEigensolver
 from qiskit_algorithms import IterativePhaseEstimation
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
 
 service = QiskitRuntimeService(channel="ibm_quantum")
 backend = service.least_busy(operational=True, simulator=False)
@@ -47,7 +46,7 @@ def compute_energy(i, distance, algorithm):
     elif algorithm == 'IQPE':
         num_iterations = 12  # Number of iterations for IQPE
         state_in = HartreeFock(molecule.num_spatial_orbitals, molecule.num_particles, tapered_mapper)
-        sampler = Sampler(backend=backend)  # Use the quantum hardware backend
+        sampler = SamplerV2(mode=backend) # Use the quantum hardware backend
         iqpe = IterativePhaseEstimation(num_iterations, sampler)
         U = UnitaryGate(expm(1j * qubit_op.to_matrix()))
         result = 2 * np.pi * (iqpe.estimate(U, state_in).phase - 1)
