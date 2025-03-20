@@ -31,11 +31,16 @@ from qiskit_aer.noise import NoiseModel, amplitude_damping_error
 GRAPHS_DIR = 'graphs'
 
 bond_lengths = [
-    0.15,
-    0.4,
-    0.735,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
     1.5,
+    2.0,
+    2.5,
+    3.0,
     4.0,
+    5.0,
     6.0
 ]
 
